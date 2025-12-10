@@ -20,6 +20,60 @@
     });
 
 // edit page js
+
+
+// banner add layout selection
+document.addEventListener("DOMContentLoaded", () => {
+
+    let bannerIndex = 1;
+    const bannerContainer = document.getElementById("bannerContainer");
+    const addBannerBtn = document.getElementById("addBannerBtn");
+
+    const bannerTemplate = (index) => `
+        <div class="banner-block p-4 border rounded bg-white mt-4">
+            <h4 class="font-semibold mb-3">Banner ${index}</h4>
+
+            <label class="block font-semibold mb-1">Background Image</label>
+            <input type="file" name="banner_bg_image[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Main Image</label>
+            <input type="file" name="banner_image[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Text Image</label>
+            <input type="file" name="banner_text_img[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Title</label>
+            <input type="text" name="banner_title[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Subtitle</label>
+            <input type="text" name="banner_subtitle[]" class="w-full border p-2 rounded mb-3">
+
+            <!-- Button 1 -->
+            <label class="block font-semibold mb-1">Button 1 Text</label>
+            <input type="text" name="banner_button1_text[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Button 1 Link</label>
+            <input type="text" name="banner_button1_link[]" class="w-full border p-2 rounded mb-3">
+
+            <!-- Button 2 -->
+            <label class="block font-semibold mb-1">Button 2 Text</label>
+            <input type="text" name="banner_button2_text[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Button 2 Link</label>
+            <input type="text" name="banner_button2_link[]" class="w-full border p-2 rounded mb-3">
+        </div>
+    `;
+
+    addBannerBtn?.addEventListener("click", () => {
+        bannerIndex++;
+        bannerContainer.insertAdjacentHTML("beforeend", bannerTemplate(bannerIndex));
+    });
+
+});
+
+
+// end
+
 document.addEventListener("DOMContentLoaded", function () {
 
     // layout switch
@@ -88,6 +142,13 @@ document.addEventListener("click", function (e) {
         const block = e.target.closest(".grid-block");
         const idInput = block.querySelector("input[name='grid_ids[]']");
         addDeleteInput("delete_grid_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
+    // Banner Delete
+    if (e.target.classList.contains("delete-banner")) {
+        const block = e.target.closest(".banner-block"); // CORRECT BLOCK
+        const idInput = block.querySelector("input[name='banner_ids[]']"); // CORRECT INPUT
+        addDeleteInput("delete_banner_ids[]", idInput?.value); // CORRECT ARRAY NAME
         block.remove();
     }
 });

@@ -104,6 +104,14 @@
                             {{ $page->layout == 'grid' ? 'bg-blue-200' : 'bg-gray-100' }}"
                         data-target="gridForm">Grid Columns (2) With Image + Text</button>
 
+                        <button type="button"
+                        class="layout-btn w-full p-3 rounded-lg text-left font-semibold
+                            {{ $page->layout == 'banner' ? 'bg-blue-200' : 'bg-gray-100' }}"
+                        data-target="bannerForm">
+                        Banner Sections
+                    </button>   
+
+
                 </div>
 
                 <!-- LAYOUT FORMS -->
@@ -317,6 +325,82 @@
                         </button>
 
                     </div>
+
+
+                    <!-- Banner Form -->
+                     <!-- BANNER FORM -->
+<div id="bannerForm"
+     class="{{ $page->layout == 'banner' ? '' : 'hidden' }} p-4 border rounded-lg bg-gray-50">
+
+    <h3 class="font-bold mb-4">Banner Sections</h3>
+
+    <div id="bannerContainer" class="space-y-4">
+
+        @foreach ($bannerItems as $i => $b)
+        <div class="banner-block p-4 border rounded bg-white relative">
+
+            <!-- Delete Button -->
+            <button type="button"
+                class="delete-banner absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                Delete
+            </button>
+
+            <h4 class="font-semibold mb-3">Banner {{ $i+1 }}</h4>
+
+            <!-- Existing ID -->
+            <input type="hidden" name="banner_ids[]" value="{{ $b->id }}">
+
+            <label class="block font-semibold mb-1">Background Image</label>
+            <img src="{{ asset('storage/'.$b->bg_image) }}" class="w-32 mb-2 rounded">
+            <input type="file" name="banner_bg_image[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Main Image</label>
+            <img src="{{ asset('storage/'.$b->image) }}" class="w-32 mb-2 rounded">
+            <input type="file" name="banner_image[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Text Image</label>
+            <img src="{{ asset('storage/'.$b->text_img) }}" class="w-32 mb-2 rounded">
+            <input type="file" name="banner_text_img[]" class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Title</label>
+            <input type="text" name="banner_title[]" value="{{ $b->title }}"
+                   class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Subtitle</label>
+            <input type="text" name="banner_subtitle[]" value="{{ $b->subtitle }}"
+                   class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Button 1 Text</label>
+            <input type="text" name="banner_button1_text[]" value="{{ $b->button1_text }}"
+                   class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Button 1 Link</label>
+            <input type="text" name="banner_button1_link[]" value="{{ $b->button1_link }}"
+                   class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Button 2 Text</label>
+            <input type="text" name="banner_button2_text[]" value="{{ $b->button2_text }}"
+                   class="w-full border p-2 rounded mb-3">
+
+            <label class="block font-semibold mb-1">Button 2 Link</label>
+            <input type="text" name="banner_button2_link[]" value="{{ $b->button2_link }}"
+                   class="w-full border p-2 rounded mb-3">
+
+        </div>
+        @endforeach
+
+    </div>
+
+    <!-- Add new Banner Section -->
+    <button type="button" id="addBannerBtn"
+            class="mt-4 bg-orange-500 text-white px-4 py-2 rounded">
+        + Add Banner Section
+    </button>
+
+</div>
+
+
+                    <!-- end -->
 
                 </div>
             </div>

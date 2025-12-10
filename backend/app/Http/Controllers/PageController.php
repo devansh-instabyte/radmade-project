@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Page;
 use App\Models\PageSlider;
 use App\Models\PageCarousel;
+use App\Models\PageBanner;
 use App\Models\PageGrid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str; 
@@ -39,9 +40,9 @@ public function create(Request $request)
 {
     if ($request->isMethod('post')) {
 
-        // -------------------------------
-        // 1. Save Page
-        // -------------------------------
+        /* -------------------------------
+            1. Save Page
+        ------------------------------- */
         $page = new Page();
         $page->title = $request->title;
         $page->slug = Str::slug($request->slug ?? $request->title);
@@ -53,9 +54,9 @@ public function create(Request $request)
         $page->save();
 
 
-        // -------------------------------
-        // 2. Save Sliders
-        // -------------------------------
+        /* -------------------------------
+            2. Save Sliders
+        ------------------------------- */
         if (!empty($request->slider_titles)) {
 
             foreach ($request->slider_titles as $i => $title) {
@@ -64,7 +65,7 @@ public function create(Request $request)
 
                 if ($request->hasFile("slider_images.$i")) {
                     $imagePath = $request->file("slider_images.$i")
-                                         ->store("sliders", "public");
+                                        ->store("sliders", "public");
                 }
 
                 PageSlider::create([
@@ -77,10 +78,9 @@ public function create(Request $request)
         }
 
 
-
-        // -------------------------------
-        // 3. Save Carousel Items (MULTIPLE ROWS)
-        // -------------------------------
+        /* -------------------------------
+            3. Save Carousel Items
+        ------------------------------- */
         if (!empty($request->carousel_titles)) {
 
             foreach ($request->carousel_titles as $i => $title) {
@@ -93,48 +93,93 @@ public function create(Request $request)
                 }
 
                 PageCarousel::create([
-                'page_id'     => $page->id,
-                'items_desktop'  => $request->carousel_items_desktop ?? 3,
-                'items_tablet'   => $request->carousel_items_tablet ?? 2,
-                'items_mobile'   => $request->carousel_items_mobile ?? 1,
-                'autoplay'       => $request->carousel_autoplay ?? 1,
-                'speed'          => $request->carousel_speed ?? 3000,
-                'loop'           => $request->carousel_loop ?? 1,
-                'nav'            => $request->carousel_nav ?? 1,
-                'dots'           => $request->carousel_dots ?? 1,
-                    // ITEM CONTENT
-                    'image'       => $path,
-                    'title'       => $title,
-                    'description' => $request->carousel_descriptions[$i] ?? null,
+                    'page_id'       => $page->id,
+                    'items_desktop' => $request->carousel_items_desktop ?? 3,
+                    'items_tablet'  => $request->carousel_items_tablet ?? 2,
+                    'items_mobile'  => $request->carousel_items_mobile ?? 1,
+                    'autoplay'      => $request->carousel_autoplay ?? 1,
+                    'speed'         => $request->carousel_speed ?? 3000,
+                    'loop'          => $request->carousel_loop ?? 1,
+                    'nav'           => $request->carousel_nav ?? 1,
+                    'dots'          => $request->carousel_dots ?? 1,
+                    'image'         => $path,
+                    'title'         => $title,
+                    'description'   => $request->carousel_descriptions[$i] ?? null,
+                    'sort_order'    => $i + 1,
+                ]);
+            }
+        }
+
+
+        /* -------------------------------
+            4. Save Grid Sections
+        ------------------------------- */
+        if (!empty($request->grid_titles)) {
+
+            foreach ($request->grid_titles as $i => $title) {
+
+                $imagePath = null;
+
+                if ($request->hasFile("grid_images.$i")) {
+                    $imagePath = $request->file("grid_images.$i")
+                                        ->store("grids", "public");
+                }
+
+                PageGrid::create([
+                    'page_id'     => $page->id,
+                    'image'       => $imagePath,
+                    'title'       => $title ?? "",
+                    'description' => $request->grid_descriptions[$i] ?? "",
+                    'layout'      => $request->grid_layouts[$i] ?? "left",
                     'sort_order'  => $i + 1,
                 ]);
             }
         }
 
 
-                // SAVE GRID SECTIONS
-            if (!empty($request->grid_titles)) {
+        /* -------------------------------
+            5. Save Banner Sections (NEW)
+        ------------------------------- */
+        if (!empty($request->banner_title)) {
 
-                foreach ($request->grid_titles as $i => $title) {
+            foreach ($request->banner_title as $i => $title) {
 
-                    $imagePath = null;
-
-                    if ($request->hasFile("grid_images.$i")) {
-                        $imagePath = $request->file("grid_images.$i")
-                                            ->store("grids", "public");
-                    }
-
-                    PageGrid::create([
-                        'page_id'     => $page->id,
-                        'image'       => $imagePath,
-                        'title'       => $title ?? "",
-                        'description' => $request->grid_descriptions[$i] ?? "",
-                        'layout'      => $request->grid_layouts[$i] ?? "left",
-                        'sort_order'  => $i + 1,
-                    ]);
+                // Background Image
+                $bgImage = null;
+                if ($request->hasFile("banner_bg_image.$i")) {
+                    $bgImage = $request->file("banner_bg_image.$i")
+                                       ->store("banners/bg", "public");
                 }
-            }
 
+                // Main Image
+                $mainImage = null;
+                if ($request->hasFile("banner_image.$i")) {
+                    $mainImage = $request->file("banner_image.$i")
+                                        ->store("banners/main", "public");
+                }
+
+                // Text Image
+                $textImage = null;
+                if ($request->hasFile("banner_text_img.$i")) {
+                    $textImage = $request->file("banner_text_img.$i")
+                                        ->store("banners/text", "public");
+                }
+
+                PageBanner::create([
+                    'page_id'           => $page->id,
+                    'bg_image'          => $bgImage,
+                    'image'             => $mainImage,
+                    'text_img'          => $textImage,
+                    'title'             => $title,
+                    'subtitle'          => $request->banner_subtitle[$i] ?? "",
+                    'button1_text'      => $request->banner_button1_text[$i] ?? "",
+                    'button1_link'      => $request->banner_button1_link[$i] ?? "",
+                    'button2_text'      => $request->banner_button2_text[$i] ?? "",
+                    'button2_link'      => $request->banner_button2_link[$i] ?? "",
+                    'sort_order'        => $i + 1,
+                ]);
+            }
+        }
 
 
         return redirect()->back()->with("success", "Page Created Successfully");
@@ -155,8 +200,9 @@ public function create(Request $request)
     $sliders = PageSlider::where('page_id', $id)->get();
     $carouselItems = PageCarousel::where('page_id', $id)->get();
     $gridItems = PageGrid::where('page_id', $id)->get();
+      $bannerItems = PageBanner::where('page_id', $id)->get();
 
-    return view('pages.edit', compact('page', 'sliders', 'carouselItems', 'gridItems'));
+    return view('pages.edit', compact('page', 'sliders', 'carouselItems', 'gridItems' , 'bannerItems'));
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -194,6 +240,10 @@ public function update(Request $request, $id)
     if ($request->delete_grid_ids) {
         PageGrid::whereIn('id', $request->delete_grid_ids)->delete();
     }
+    if ($request->delete_banner_ids) {
+    PageBanner::whereIn('id', $request->delete_banner_ids)->delete(); // ✅ CORRECT
+}
+
 
 
     /* ============================================================
