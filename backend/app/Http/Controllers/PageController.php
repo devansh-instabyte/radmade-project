@@ -167,7 +167,9 @@ public function update(Request $request, $id)
 {
     $page = Page::findOrFail($id);
 
-    // Update Page Fields
+    /* -------------------------------------------------------
+        UPDATE PAGE BASIC FIELDS
+    ------------------------------------------------------- */
     $page->title = $request->title;
     $page->slug = Str::slug($request->slug ?? $request->title);
     $page->content = $request->content;
@@ -177,22 +179,39 @@ public function update(Request $request, $id)
     $page->save();
 
 
+    /* -------------------------------------------------------
+        HANDLE DELETE REQUESTS FIRST
+    ------------------------------------------------------- */
+
+    if ($request->delete_slider_ids) {
+        PageSlider::whereIn('id', $request->delete_slider_ids)->delete();
+    }
+
+    if ($request->delete_carousel_ids) {
+        PageCarousel::whereIn('id', $request->delete_carousel_ids)->delete();
+    }
+
+    if ($request->delete_grid_ids) {
+        PageGrid::whereIn('id', $request->delete_grid_ids)->delete();
+    }
+
+
     /* ============================================================
         1. SLIDER — UPDATE OLD + ADD NEW
-    ============================================================ */
+    ============================================================= */
     if ($request->layout == "slider") {
 
-        $oldSliders = PageSlider::where('page_id', $id)->get();
+        $existing = PageSlider::where('page_id', $id)->get()->values(); // reindex
 
         foreach ($request->slider_titles as $i => $title) {
 
-            // Existing row or new row
-            $slider = $oldSliders[$i] ?? new PageSlider();
+            // Get existing or new
+            $slider = $existing[$i] ?? new PageSlider();
             $slider->page_id = $id;
             $slider->title = $title;
             $slider->description = $request->slider_descriptions[$i] ?? null;
 
-            // Update image ONLY when uploaded
+            // If new image uploaded
             if ($request->hasFile("slider_images.$i")) {
                 $slider->image = $request->file("slider_images.$i")
                                         ->store("sliders", "public");
@@ -205,17 +224,17 @@ public function update(Request $request, $id)
 
     /* ============================================================
         2. CAROUSEL — UPDATE OLD + ADD NEW
-    ============================================================ */
+    ============================================================= */
     if ($request->layout == "carousel") {
 
-        $oldCarousel = PageCarousel::where('page_id', $id)->get();
+        $existing = PageCarousel::where('page_id', $id)->orderBy('sort_order')->get()->values();
 
         foreach ($request->carousel_titles as $i => $title) {
 
-            $item = $oldCarousel[$i] ?? new PageCarousel();
+            $item = $existing[$i] ?? new PageCarousel();
             $item->page_id = $id;
 
-            // Settings
+            // Settings stored in every row
             $item->items_desktop = $request->carousel_items_desktop;
             $item->items_tablet  = $request->carousel_items_tablet;
             $item->items_mobile  = $request->carousel_items_mobile;
@@ -229,13 +248,14 @@ public function update(Request $request, $id)
             $item->title = $title;
             $item->description = $request->carousel_descriptions[$i] ?? null;
 
-            // Update image only if user uploads
+            // Image update only if new uploaded
             if ($request->hasFile("carousel_images.$i")) {
                 $item->image = $request->file("carousel_images.$i")
                                        ->store("carousels", "public");
             }
 
             $item->sort_order = $i + 1;
+
             $item->save();
         }
     }
@@ -243,14 +263,14 @@ public function update(Request $request, $id)
 
     /* ============================================================
         3. GRID — UPDATE OLD + ADD NEW
-    ============================================================ */
+    ============================================================= */
     if ($request->layout == "grid") {
 
-        $oldGrid = PageGrid::where('page_id', $id)->get();
+        $existing = PageGrid::where('page_id', $id)->orderBy('sort_order')->get()->values();
 
         foreach ($request->grid_titles as $i => $title) {
 
-            $grid = $oldGrid[$i] ?? new PageGrid();
+            $grid = $existing[$i] ?? new PageGrid();
             $grid->page_id = $id;
 
             $grid->title = $title;
@@ -263,6 +283,7 @@ public function update(Request $request, $id)
             }
 
             $grid->sort_order = $i + 1;
+
             $grid->save();
         }
     }
@@ -271,6 +292,7 @@ public function update(Request $request, $id)
     return redirect()->route('admin.editpage', $id)
                      ->with('success', 'Page updated successfully!');
 }
+
 
 
 // ------------------------------------------------------------------------------------------------------------------------------

@@ -102,7 +102,7 @@
                     <button type="button"
                         class="layout-btn w-full p-3 rounded-lg text-left font-semibold
                             {{ $page->layout == 'grid' ? 'bg-blue-200' : 'bg-gray-100' }}"
-                        data-target="gridForm">2 Grid Columns With Image + Text</button>
+                        data-target="gridForm">Grid Columns (2) With Image + Text</button>
 
                 </div>
 
@@ -118,8 +118,17 @@
                         <div id="sliderContainer" class="space-y-4">
 
                             @foreach ($sliders as $i => $slider)
-                            <div class="slider-item p-4 border rounded bg-white">
+                            <div class="slider-item p-4 border rounded bg-white relative">
+                                <!-- Delete button -->
+                                <button type="button"
+                                    class="delete-slider absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                    Delete
+                                </button>
+
                                 <h4 class="font-semibold mb-2">Slider {{ $i+1 }}</h4>
+
+                                <!-- Existing ID -->
+                                <input type="hidden" name="slider_ids[]" value="{{ $slider->id }}">
 
                                 <img src="{{ asset('storage/'.$slider->image) }}" class="w-32 rounded mb-2">
 
@@ -136,9 +145,16 @@
 
                         </div>
 
+                        <!-- Optional: Add new slider button -->
+                        {{-- 
+                        <button type="button" id="addSliderBtn"
+                                class="mt-4 bg-green-500 text-white px-4 py-2 rounded">
+                            + Add Slider
+                        </button>
+                        --}}
                     </div>
 
-                 <!-- CAROUSEL FORM -->
+                    <!-- CAROUSEL FORM -->
                     <div id="carouselForm"
                         class="{{ $page->layout == 'carousel' ? '' : 'hidden' }} p-4 border rounded-lg bg-gray-50">
 
@@ -218,8 +234,17 @@
                         <div id="carouselContainer" class="space-y-4">
 
                             @foreach ($carouselItems as $i => $item)
-                            <div class="carousel-item p-4 border rounded bg-white">
+                            <div class="carousel-item p-4 border rounded bg-white relative">
+                                <!-- Delete button -->
+                                <button type="button"
+                                    class="delete-carousel absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                    Delete
+                                </button>
+
                                 <h4 class="font-semibold mb-2">Item {{ $i+1 }}</h4>
+
+                                <!-- Existing ID -->
+                                <input type="hidden" name="carousel_ids[]" value="{{ $item->id }}">
 
                                 <img src="{{ asset('storage/'.$item->image) }}" class="w-32 rounded mb-2">
 
@@ -254,8 +279,17 @@
                         <div id="gridContainer" class="space-y-4">
 
                             @foreach ($gridItems as $i => $g)
-                            <div class="grid-block p-4 border rounded bg-white">
+                            <div class="grid-block p-4 border rounded bg-white relative">
+                                <!-- Delete button -->
+                                <button type="button"
+                                    class="delete-grid absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                    Delete
+                                </button>
+
                                 <h4 class="font-semibold mb-2">Section {{ $i+1 }}</h4>
+
+                                <!-- Existing ID -->
+                                <input type="hidden" name="grid_ids[]" value="{{ $g->id }}">
 
                                 <img src="{{ asset('storage/'.$g->image) }}" class="w-32 mb-2 rounded">
 
@@ -276,6 +310,12 @@
 
                         </div>
 
+                        <!-- Add Grid Section Button -->
+                        <button type="button" id="addGridBtn"
+                                class="mt-4 bg-purple-600 text-white px-4 py-2 rounded">
+                            + Add Section
+                        </button>
+
                     </div>
 
                 </div>
@@ -289,169 +329,19 @@
 
 <!-- CKEditor -->
 <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
 <script>
 ClassicEditor.create(document.querySelector('#content'));
 </script>
 
+<script src="{{asset('assets/backend/page.js')}}"></script>
+
+{{-- Initial count for grid sections --}}
+<script>
+    const initialGridCount = {{ count($gridItems ?? []) }};
+</script>
+
+
+
+
 @endsection
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    // layout switch
-    const buttons = document.querySelectorAll(".layout-btn");
-    const layoutInput = document.getElementById("selectedLayout");
-
-    buttons.forEach(btn => {
-        btn.addEventListener("click", function () {
-
-            // hide all
-            document.querySelectorAll("#sliderForm, #carouselForm, #gridForm")
-                .forEach(s => s.classList.add("hidden"));
-
-            // show selected
-            const target = this.getAttribute("data-target");
-            document.getElementById(target).classList.remove("hidden");
-
-            // update layout value
-            layoutInput.value = target.replace("Form","");
-
-            // highlight
-            buttons.forEach(b => b.classList.remove("bg-blue-200"));
-            this.classList.add("bg-blue-200");
-        });
-    });
-
-});
-</script>
-
-
-<!-- Add Slider Button -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    let sliderIndex = 1;
-
-    document.getElementById("addSliderBtn").addEventListener("click", function () {
-
-        sliderIndex++;
-
-        const sliderContainer = document.getElementById("sliderContainer");
-
-        const html = `
-            <div class="slider-item p-4 border rounded bg-white mt-4">
-                <h4 class="font-semibold mb-2">Slider ${sliderIndex}</h4>
-
-                <input type="file" name="slider_images[]" class="w-full border p-2 rounded mb-2">
-                <input type="text" name="slider_titles[]" placeholder="Slider Title"
-                       class="w-full p-2 border rounded mb-2">
-
-                <textarea name="slider_descriptions[]" placeholder="Slider Description"
-                          class="w-full p-2 border rounded"></textarea>
-            </div>`;
-
-        sliderContainer.insertAdjacentHTML("beforeend", html);
-    });
-
-});
-</script>
-
-<!-- Carousel Add Item Button -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-    let carouselIndex = 1;
-
-    document.getElementById("addCarouselItemBtn").addEventListener("click", function () {
-
-        carouselIndex++;
-
-        const container = document.getElementById("carouselContainer");
-
-        const html = `
-            <div class="carousel-item p-4 border rounded bg-white mt-4">
-                <h4 class="font-semibold mb-2">Item ${carouselIndex}</h4>
-
-                <input type="file" name="carousel_images[]" class="w-full border p-2 rounded mb-2">
-
-                <input type="text" name="carousel_titles[]" placeholder="Title (optional)"
-                       class="w-full border p-2 rounded mb-2">
-
-                <textarea name="carousel_descriptions[]" placeholder="Description (optional)"
-                          class="w-full border p-2 rounded"></textarea>
-            </div>
-        `;
-
-        container.insertAdjacentHTML("beforeend", html);
-    });
-
-});
-</script>
-<!-- end -->
-
-
-<!-- grid images -->
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-
-    let gridIndex = 1;
-    const gridContainer = document.getElementById("gridContainer");
-    const addGridBtn = document.getElementById("addGridBtn");
-
-    // Grid Block Template Function
-    const gridTemplate = (index) => `
-        <div class="grid-block p-4 border rounded bg-white mt-4">
-            <h4 class="font-semibold mb-3">Section ${index}</h4>
-
-            <label class="block font-semibold mb-1">Image</label>
-            <input type="file" name="grid_images[]" class="w-full border p-2 rounded mb-3">
-
-            <label class="block font-semibold mb-1">Title</label>
-            <input type="text" name="grid_titles[]" class="w-full border p-2 rounded mb-3" placeholder="Enter Title">
-
-            <label class="block font-semibold mb-1">Description</label>
-            <textarea name="grid_descriptions[]" class="w-full border p-2 rounded mb-3" placeholder="Enter Description"></textarea>
-
-            <label class="block font-semibold mb-1">Layout</label>
-            <select name="grid_layouts[]" class="w-full border p-2 rounded">
-                <option value="left">Image Left – Text Right</option>
-                <option value="right">Image Right – Text Left</option>
-            </select>
-        </div>
-    `;
-
-    // Add New Section
-    addGridBtn?.addEventListener("click", () => {
-        gridIndex++;
-        gridContainer.insertAdjacentHTML("beforeend", gridTemplate(gridIndex));
-    });
-
-});
-
-</script>
-
-<!-- end -->
-
-<!-- Layout Selection Script -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const buttons = document.querySelectorAll(".layout-btn");
-
-    buttons.forEach(btn => {
-        btn.addEventListener("click", function () {
-
-            document.querySelectorAll("#sliderForm, #carouselForm, #gridForm")
-                .forEach(section => section.classList.add("hidden"));
-
-            const target = this.getAttribute("data-target");
-            document.getElementById(target).classList.remove("hidden");
-
-            buttons.forEach(b => b.classList.remove("bg-blue-200"));
-            this.classList.add("bg-blue-200");
-
-        });
-    });
-
-});
-</script>

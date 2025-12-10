@@ -1,4 +1,25 @@
-// edit page & add page js
+  document.addEventListener("DOMContentLoaded", function () {
+
+        const title = document.querySelector("input[name='title']");
+        const slug = document.querySelector("input[name='slug']");
+
+        // Function to convert title → slug
+        function createSlug(text) {
+            return text
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9\s-]/g, "")    // remove special chars
+                .replace(/\s+/g, "-")            // spaces → hyphens
+                .replace(/-+/g, "-");            // remove duplicate hyphens
+        }
+
+        // Auto-generate slug when typing title
+        title.addEventListener("input", function () {
+            slug.value = createSlug(title.value);
+        });
+    });
+
+// edit page js
 document.addEventListener("DOMContentLoaded", function () {
 
     // layout switch
@@ -29,6 +50,50 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+// Delete 
+
+// Delete buttons (Slider, Carousel, Grid)
+document.addEventListener("click", function (e) {
+    const form = document.querySelector("form");
+    if (!form) return;
+
+    // Helper to add hidden delete input
+    function addDeleteInput(name, id) {
+        if (!id) return;
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = id;
+        form.appendChild(input);
+    }
+
+    // SLIDER DELETE
+    if (e.target.classList.contains("delete-slider")) {
+        const block = e.target.closest(".slider-item");
+        const idInput = block.querySelector("input[name='slider_ids[]']");
+        addDeleteInput("delete_slider_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
+
+    // CAROUSEL DELETE
+    if (e.target.classList.contains("delete-carousel")) {
+        const block = e.target.closest(".carousel-item");
+        const idInput = block.querySelector("input[name='carousel_ids[]']");
+        addDeleteInput("delete_carousel_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
+
+    // GRID DELETE
+    if (e.target.classList.contains("delete-grid")) {
+        const block = e.target.closest(".grid-block");
+        const idInput = block.querySelector("input[name='grid_ids[]']");
+        addDeleteInput("delete_grid_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
+});
+
+// end
+
 // <!-- Add Slider Button -->
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -56,6 +121,49 @@ document.addEventListener("DOMContentLoaded", function () {
         sliderContainer.insertAdjacentHTML("beforeend", html);
     });
 
+});
+
+
+   
+
+// Delete buttons (Slider, Carousel, Grid)
+document.addEventListener("click", function (e) {
+    const form = document.querySelector("form");
+    if (!form) return;
+
+    // Helper to add hidden delete input
+    function addDeleteInput(name, id) {
+        if (!id) return;
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = id;
+        form.appendChild(input);
+    }
+
+    // SLIDER DELETE
+    if (e.target.classList.contains("delete-slider")) {
+        const block = e.target.closest(".slider-item");
+        const idInput = block.querySelector("input[name='slider_ids[]']");
+        addDeleteInput("delete_slider_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
+
+    // CAROUSEL DELETE
+    if (e.target.classList.contains("delete-carousel")) {
+        const block = e.target.closest(".carousel-item");
+        const idInput = block.querySelector("input[name='carousel_ids[]']");
+        addDeleteInput("delete_carousel_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
+
+    // GRID DELETE
+    if (e.target.classList.contains("delete-grid")) {
+        const block = e.target.closest(".grid-block");
+        const idInput = block.querySelector("input[name='grid_ids[]']");
+        addDeleteInput("delete_grid_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
 });
 
 
@@ -90,7 +198,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+
 // <!-- end -->
+
+
+
 
 
 // <!-- grid images -->
