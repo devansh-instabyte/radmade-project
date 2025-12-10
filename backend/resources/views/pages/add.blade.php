@@ -256,58 +256,55 @@
 
                 </div>
             <!-- end -->
+                        <!-- BANNER FORM -->
+                        <div id="bannerForm" class="hidden p-4 border rounded-lg bg-gray-50">
 
-            <!-- banner start -->
-             <!-- BANNER FORM -->
-<!-- BANNER FORM -->
-<div id="bannerForm" class="hidden p-4 border rounded-lg bg-gray-50">
+                            <h3 class="font-bold mb-4">Banner Sections</h3>
 
-    <h3 class="font-bold mb-4">Banner Sections</h3>
+                            <div id="bannerContainer" class="space-y-4">
 
-    <div id="bannerContainer" class="space-y-4">
+                                <!-- Default Banner Block -->
+                                <div class="banner-block p-4 border rounded bg-white">
+                                    <h4 class="font-semibold mb-3">Banner 1</h4>
 
-        <!-- Default Banner Block -->
-        <div class="banner-block p-4 border rounded bg-white">
-            <h4 class="font-semibold mb-3">Banner 1</h4>
+                                    <label class="block font-semibold mb-1">Background Image</label>
+                                    <input type="file" name="banner_bg_image[]" class="w-full border p-2 rounded mb-3">
 
-            <label class="block font-semibold mb-1">Background Image</label>
-            <input type="file" name="banner_bg_image[]" class="w-full border p-2 rounded mb-3">
+                                    <label class="block font-semibold mb-1">Main Image</label>
+                                    <input type="file" name="banner_image[]" class="w-full border p-2 rounded mb-3">
 
-            <label class="block font-semibold mb-1">Main Image</label>
-            <input type="file" name="banner_image[]" class="w-full border p-2 rounded mb-3">
+                                    <label class="block font-semibold mb-1">Text Image</label>
+                                    <input type="file" name="banner_text_img[]" class="w-full border p-2 rounded mb-3">
 
-            <label class="block font-semibold mb-1">Text Image</label>
-            <input type="file" name="banner_text_img[]" class="w-full border p-2 rounded mb-3">
+                                    <label class="block font-semibold mb-1">Title</label>
+                                    <input type="text" name="banner_title[]" class="w-full border p-2 rounded mb-3">
 
-            <label class="block font-semibold mb-1">Title</label>
-            <input type="text" name="banner_title[]" class="w-full border p-2 rounded mb-3">
+                                    <label class="block font-semibold mb-1">Subtitle</label>
+                                    <input type="text" name="banner_subtitle[]" class="w-full border p-2 rounded mb-3">
 
-            <label class="block font-semibold mb-1">Subtitle</label>
-            <input type="text" name="banner_subtitle[]" class="w-full border p-2 rounded mb-3">
+                                    <!-- Button 1 -->
+                                    <label class="block font-semibold mb-1">Button 1 Text</label>
+                                    <input type="text" name="banner_button1_text[]" class="w-full border p-2 rounded mb-3">
 
-            <!-- Button 1 -->
-            <label class="block font-semibold mb-1">Button 1 Text</label>
-            <input type="text" name="banner_button1_text[]" class="w-full border p-2 rounded mb-3">
+                                    <label class="block font-semibold mb-1">Button 1 Link</label>
+                                    <input type="text" name="banner_button1_link[]" class="w-full border p-2 rounded mb-3">
 
-            <label class="block font-semibold mb-1">Button 1 Link</label>
-            <input type="text" name="banner_button1_link[]" class="w-full border p-2 rounded mb-3">
+                                    <!-- Button 2 -->
+                                    <label class="block font-semibold mb-1">Button 2 Text</label>
+                                    <input type="text" name="banner_button2_text[]" class="w-full border p-2 rounded mb-3">
 
-            <!-- Button 2 -->
-            <label class="block font-semibold mb-1">Button 2 Text</label>
-            <input type="text" name="banner_button2_text[]" class="w-full border p-2 rounded mb-3">
+                                    <label class="block font-semibold mb-1">Button 2 Link</label>
+                                    <input type="text" name="banner_button2_link[]" class="w-full border p-2 rounded mb-3">
+                                </div>
 
-            <label class="block font-semibold mb-1">Button 2 Link</label>
-            <input type="text" name="banner_button2_link[]" class="w-full border p-2 rounded mb-3">
-        </div>
+                            </div>
 
-    </div>
+                            <button type="button" id="addBannerBtn"
+                                    class="mt-4 bg-orange-500 text-white px-4 py-2 rounded">
+                                + Add Banner Section
+                            </button>
 
-    <button type="button" id="addBannerBtn"
-            class="mt-4 bg-orange-500 text-white px-4 py-2 rounded">
-        + Add Banner Section
-    </button>
-
-</div>
+                        </div>
 
 
 

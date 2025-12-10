@@ -347,29 +347,40 @@
 
             <h4 class="font-semibold mb-3">Banner {{ $i+1 }}</h4>
 
-            <!-- Existing ID -->
             <input type="hidden" name="banner_ids[]" value="{{ $b->id }}">
 
+            <!-- Background Image -->
             <label class="block font-semibold mb-1">Background Image</label>
-            <img src="{{ asset('storage/'.$b->bg_image) }}" class="w-32 mb-2 rounded">
+            @if($b->bg_image)
+                <img src="{{ asset('storage/'.$b->bg_image) }}" class="w-32 mb-2 rounded">
+            @endif
             <input type="file" name="banner_bg_image[]" class="w-full border p-2 rounded mb-3">
 
+            <!-- Main Image -->
             <label class="block font-semibold mb-1">Main Image</label>
-            <img src="{{ asset('storage/'.$b->image) }}" class="w-32 mb-2 rounded">
+            @if($b->image)
+                <img src="{{ asset('storage/'.$b->image) }}" class="w-32 mb-2 rounded">
+            @endif
             <input type="file" name="banner_image[]" class="w-full border p-2 rounded mb-3">
 
+            <!-- Text Image -->
             <label class="block font-semibold mb-1">Text Image</label>
-            <img src="{{ asset('storage/'.$b->text_img) }}" class="w-32 mb-2 rounded">
+            @if($b->text_img)
+                <img src="{{ asset('storage/'.$b->text_img) }}" class="w-32 mb-2 rounded">
+            @endif
             <input type="file" name="banner_text_img[]" class="w-full border p-2 rounded mb-3">
 
+            <!-- Title -->
             <label class="block font-semibold mb-1">Title</label>
-            <input type="text" name="banner_title[]" value="{{ $b->title }}"
+            <input type="text" name="banner_titles[]" value="{{ $b->title }}"
                    class="w-full border p-2 rounded mb-3">
 
+            <!-- Subtitle -->
             <label class="block font-semibold mb-1">Subtitle</label>
-            <input type="text" name="banner_subtitle[]" value="{{ $b->subtitle }}"
+            <input type="text" name="banner_subtitles[]" value="{{ $b->subtitle }}"
                    class="w-full border p-2 rounded mb-3">
 
+            <!-- Button 1 -->
             <label class="block font-semibold mb-1">Button 1 Text</label>
             <input type="text" name="banner_button1_text[]" value="{{ $b->button1_text }}"
                    class="w-full border p-2 rounded mb-3">
@@ -378,6 +389,7 @@
             <input type="text" name="banner_button1_link[]" value="{{ $b->button1_link }}"
                    class="w-full border p-2 rounded mb-3">
 
+            <!-- Button 2 -->
             <label class="block font-semibold mb-1">Button 2 Text</label>
             <input type="text" name="banner_button2_text[]" value="{{ $b->button2_text }}"
                    class="w-full border p-2 rounded mb-3">
@@ -388,16 +400,14 @@
 
         </div>
         @endforeach
-
     </div>
 
-    <!-- Add new Banner Section -->
     <button type="button" id="addBannerBtn"
             class="mt-4 bg-orange-500 text-white px-4 py-2 rounded">
         + Add Banner Section
     </button>
-
 </div>
+
 
 
                     <!-- end -->

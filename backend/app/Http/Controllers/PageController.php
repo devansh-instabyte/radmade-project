@@ -216,17 +216,18 @@ public function update(Request $request, $id)
     /* -------------------------------------------------------
         UPDATE PAGE BASIC FIELDS
     ------------------------------------------------------- */
-    $page->title = $request->title;
-    $page->slug = Str::slug($request->slug ?? $request->title);
-    $page->content = $request->content;
-    $page->meta_title = $request->meta_title;
-    $page->meta_keywords = $request->meta_keywords;
+    $page->title            = $request->title;
+    $page->slug             = Str::slug($request->slug ?? $request->title);
+    $page->content          = $request->content;
+    $page->meta_title       = $request->meta_title;
+    $page->meta_keywords    = $request->meta_keywords;
     $page->meta_description = $request->meta_description;
+    $page->status           = $request->status ?? 1;
     $page->save();
 
 
     /* -------------------------------------------------------
-        HANDLE DELETE REQUESTS FIRST
+        DELETE SELECTED ITEMS
     ------------------------------------------------------- */
 
     if ($request->delete_slider_ids) {
@@ -240,9 +241,10 @@ public function update(Request $request, $id)
     if ($request->delete_grid_ids) {
         PageGrid::whereIn('id', $request->delete_grid_ids)->delete();
     }
+
     if ($request->delete_banner_ids) {
-    PageBanner::whereIn('id', $request->delete_banner_ids)->delete(); // ✅ CORRECT
-}
+        PageBanner::whereIn('id', $request->delete_banner_ids)->delete();
+    }
 
 
 
@@ -251,25 +253,27 @@ public function update(Request $request, $id)
     ============================================================= */
     if ($request->layout == "slider") {
 
-        $existing = PageSlider::where('page_id', $id)->get()->values(); // reindex
+        $existing = PageSlider::where('page_id', $id)->get()->values();
 
-        foreach ($request->slider_titles as $i => $title) {
+        if (!empty($request->slider_titles)) {
 
-            // Get existing or new
-            $slider = $existing[$i] ?? new PageSlider();
-            $slider->page_id = $id;
-            $slider->title = $title;
-            $slider->description = $request->slider_descriptions[$i] ?? null;
+            foreach ($request->slider_titles as $i => $title) {
 
-            // If new image uploaded
-            if ($request->hasFile("slider_images.$i")) {
-                $slider->image = $request->file("slider_images.$i")
-                                        ->store("sliders", "public");
+                $slider = $existing[$i] ?? new PageSlider();
+                $slider->page_id = $id;
+                $slider->title   = $title;
+                $slider->description = $request->slider_descriptions[$i] ?? null;
+
+                if ($request->hasFile("slider_images.$i")) {
+                    $slider->image = $request->file("slider_images.$i")
+                                            ->store("sliders", "public");
+                }
+
+                $slider->save();
             }
-
-            $slider->save();
         }
     }
+
 
 
     /* ============================================================
@@ -277,38 +281,42 @@ public function update(Request $request, $id)
     ============================================================= */
     if ($request->layout == "carousel") {
 
-        $existing = PageCarousel::where('page_id', $id)->orderBy('sort_order')->get()->values();
+        $existing = PageCarousel::where('page_id', $id)
+                    ->orderBy('sort_order')
+                    ->get()->values();
 
-        foreach ($request->carousel_titles as $i => $title) {
+        if (!empty($request->carousel_titles)) {
 
-            $item = $existing[$i] ?? new PageCarousel();
-            $item->page_id = $id;
+            foreach ($request->carousel_titles as $i => $title) {
 
-            // Settings stored in every row
-            $item->items_desktop = $request->carousel_items_desktop;
-            $item->items_tablet  = $request->carousel_items_tablet;
-            $item->items_mobile  = $request->carousel_items_mobile;
-            $item->autoplay      = $request->carousel_autoplay;
-            $item->speed         = $request->carousel_speed;
-            $item->loop          = $request->carousel_loop;
-            $item->nav           = $request->carousel_nav;
-            $item->dots          = $request->carousel_dots;
+                $item = $existing[$i] ?? new PageCarousel();
+                $item->page_id = $id;
 
-            // Content
-            $item->title = $title;
-            $item->description = $request->carousel_descriptions[$i] ?? null;
+                // Store settings (same for all rows)
+                $item->items_desktop = $request->carousel_items_desktop;
+                $item->items_tablet  = $request->carousel_items_tablet;
+                $item->items_mobile  = $request->carousel_items_mobile;
+                $item->autoplay      = $request->carousel_autoplay;
+                $item->speed         = $request->carousel_speed;
+                $item->loop          = $request->carousel_loop;
+                $item->nav           = $request->carousel_nav;
+                $item->dots          = $request->carousel_dots;
 
-            // Image update only if new uploaded
-            if ($request->hasFile("carousel_images.$i")) {
-                $item->image = $request->file("carousel_images.$i")
-                                       ->store("carousels", "public");
+                // Content
+                $item->title        = $title;
+                $item->description  = $request->carousel_descriptions[$i] ?? null;
+
+                if ($request->hasFile("carousel_images.$i")) {
+                    $item->image = $request->file("carousel_images.$i")
+                                           ->store("carousels", "public");
+                }
+
+                $item->sort_order = $i + 1;
+                $item->save();
             }
-
-            $item->sort_order = $i + 1;
-
-            $item->save();
         }
     }
+
 
 
     /* ============================================================
@@ -316,29 +324,83 @@ public function update(Request $request, $id)
     ============================================================= */
     if ($request->layout == "grid") {
 
-        $existing = PageGrid::where('page_id', $id)->orderBy('sort_order')->get()->values();
+        $existing = PageGrid::where('page_id', $id)
+                    ->orderBy('sort_order')
+                    ->get()->values();
 
-        foreach ($request->grid_titles as $i => $title) {
+        if (!empty($request->grid_titles)) {
 
-            $grid = $existing[$i] ?? new PageGrid();
-            $grid->page_id = $id;
+            foreach ($request->grid_titles as $i => $title) {
 
-            $grid->title = $title;
-            $grid->description = $request->grid_descriptions[$i] ?? null;
-            $grid->layout = $request->grid_layouts[$i] ?? "left";
+                $grid = $existing[$i] ?? new PageGrid();
+                $grid->page_id = $id;
 
-            if ($request->hasFile("grid_images.$i")) {
-                $grid->image = $request->file("grid_images.$i")
-                                      ->store("grids", "public");
+                $grid->title       = $title;
+                $grid->description = $request->grid_descriptions[$i] ?? null;
+                $grid->layout      = $request->grid_layouts[$i] ?? "left";
+
+                if ($request->hasFile("grid_images.$i")) {
+                    $grid->image = $request->file("grid_images.$i")
+                                          ->store("grids", "public");
+                }
+
+                $grid->sort_order = $i + 1;
+                $grid->save();
             }
-
-            $grid->sort_order = $i + 1;
-
-            $grid->save();
         }
     }
 
 
+
+    /* ============================================================
+        4. BANNER — UPDATE OLD + ADD NEW
+    ============================================================= */
+    if ($request->layout == "banner") {
+
+    $existing = PageBanner::where('page_id', $id)->orderBy('sort_order')->get()->values();
+
+    $bannerTitles = $request->banner_titles ?? [];
+
+    foreach ($bannerTitles as $i => $title) {
+
+        $banner = $existing[$i] ?? new PageBanner();
+        $banner->page_id = $id;
+
+        // TEXT FIELDS
+        $banner->title        = $title;
+        $banner->subtitle     = $request->banner_subtitles[$i] ?? null;
+        $banner->button1_text = $request->banner_button1_text[$i] ?? null;
+        $banner->button1_link = $request->banner_button1_link[$i] ?? null;
+        $banner->button2_text = $request->banner_button2_text[$i] ?? null;
+        $banner->button2_link = $request->banner_button2_link[$i] ?? null;
+
+        // BACKGROUND IMAGE
+        if ($request->hasFile("banner_bg_image.$i")) {
+            $banner->bg_image = $request->file("banner_bg_image.$i")
+                                       ->store("banners/bg", "public");
+        }
+
+        // MAIN IMAGE
+        if ($request->hasFile("banner_image.$i")) {
+            $banner->image = $request->file("banner_image.$i")
+                                    ->store("banners/main", "public");
+        }
+
+        // TEXT IMAGE
+        if ($request->hasFile("banner_text_img.$i")) {
+            $banner->text_img = $request->file("banner_text_img.$i")
+                                       ->store("banners/text", "public");
+        }
+
+        $banner->sort_order = $i + 1;
+        $banner->save();
+    }
+}
+
+
+    /* -------------------------------------------------------
+        FINISH
+    ------------------------------------------------------- */
     return redirect()->route('admin.editpage', $id)
                      ->with('success', 'Page updated successfully!');
 }
