@@ -21,6 +21,31 @@
 
 // edit page js
 
+document.addEventListener("DOMContentLoaded", function () {
+
+    const sortableList = document.getElementById("sortableSections");
+    const orderInput = document.getElementById("sectionOrderInput");
+
+    new Sortable(sortableList, {
+        animation: 150,
+        onSort: function () {
+            let order = [];
+
+            document.querySelectorAll("#sortableSections li").forEach((item, index) => {
+                order.push({
+                    type: item.dataset.type,
+                    id: item.dataset.id,
+                    sort: index + 1
+                });
+            });
+
+            orderInput.value = JSON.stringify(order);
+        }
+    });
+
+});
+
+
 
 // banner add layout selection
 document.addEventListener("DOMContentLoaded", () => {
@@ -276,25 +301,69 @@ document.addEventListener("click", function (e) {
 
 // <!-- grid images -->
 
-    document.addEventListener("DOMContentLoaded", () => {
+//     document.addEventListener("DOMContentLoaded", () => {
 
-    let gridIndex = 1;
+//     let gridIndex = 1;
+//     const gridContainer = document.getElementById("gridContainer");
+//     const addGridBtn = document.getElementById("addGridBtn");
+
+//     // Grid Block Template Function
+//     const gridTemplate = (index) => `
+//         <div class="grid-block p-4 border rounded bg-white mt-4">
+//             <h4 class="font-semibold mb-3">Section ${index}</h4>
+
+//             <label class="block font-semibold mb-1">Image</label>
+//             <input type="file" name="grid_images[]" class="w-full border p-2 rounded mb-3">
+
+//             <label class="block font-semibold mb-1">Title</label>
+//             <input type="text" name="grid_titles[]" class="w-full border p-2 rounded mb-3" placeholder="Enter Title">
+
+//             <label class="block font-semibold mb-1">Description</label>
+//             <textarea name="grid_descriptions[]" class="w-full border p-2 rounded mb-3" placeholder="Enter Description"></textarea>
+
+//             <label class="block font-semibold mb-1">Layout</label>
+//             <select name="grid_layouts[]" class="w-full border p-2 rounded">
+//                 <option value="left">Image Left – Text Right</option>
+//                 <option value="right">Image Right – Text Left</option>
+//             </select>
+//         </div>
+//     `;
+
+//     // Add New Section
+//     addGridBtn?.addEventListener("click", () => {
+//         gridIndex++;
+//         gridContainer.insertAdjacentHTML("beforeend", gridTemplate(gridIndex));
+//     });
+
+// });
+
+
+// GRID SECTIONS + UNIQUE SECTION ID
+document.addEventListener("DOMContentLoaded", () => {
+
+    let gridIndex = document.querySelectorAll("#gridContainer .grid-block").length || 1;
     const gridContainer = document.getElementById("gridContainer");
     const addGridBtn = document.getElementById("addGridBtn");
 
-    // Grid Block Template Function
+    // Section ID generator
+    const generateSectionId = (index) => `grid${index}`;
+
+    // Grid Template
     const gridTemplate = (index) => `
         <div class="grid-block p-4 border rounded bg-white mt-4">
             <h4 class="font-semibold mb-3">Section ${index}</h4>
+
+            <!-- ⭐ Section ID: grid1, grid2, grid3 -->
+            <input type="hidden" name="grid_section_ids[]" value="${generateSectionId(index)}">
 
             <label class="block font-semibold mb-1">Image</label>
             <input type="file" name="grid_images[]" class="w-full border p-2 rounded mb-3">
 
             <label class="block font-semibold mb-1">Title</label>
-            <input type="text" name="grid_titles[]" class="w-full border p-2 rounded mb-3" placeholder="Enter Title">
+            <input type="text" name="grid_titles[]" class="w-full border p-2 rounded mb-3">
 
             <label class="block font-semibold mb-1">Description</label>
-            <textarea name="grid_descriptions[]" class="w-full border p-2 rounded mb-3" placeholder="Enter Description"></textarea>
+            <textarea name="grid_descriptions[]" class="w-full border p-2 rounded mb-3"></textarea>
 
             <label class="block font-semibold mb-1">Layout</label>
             <select name="grid_layouts[]" class="w-full border p-2 rounded">
@@ -304,13 +373,14 @@ document.addEventListener("click", function (e) {
         </div>
     `;
 
-    // Add New Section
+    // Add Grid Section
     addGridBtn?.addEventListener("click", () => {
         gridIndex++;
         gridContainer.insertAdjacentHTML("beforeend", gridTemplate(gridIndex));
     });
 
 });
+
 
 
 

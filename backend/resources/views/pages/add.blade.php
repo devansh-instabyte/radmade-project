@@ -233,7 +233,9 @@
 
                         <!-- Default Grid Block -->
                         <div class="grid-block p-4 border rounded bg-white">
-                            <h4 class="font-semibold mb-3">Section 1</h4>
+                            <h4 class="font-semibold mb-3">Section <span class="section-number">1</span></h4>
+
+                            <input type="hidden" name="grid_section_ids[]" value="grid1">
 
                             <label class="block font-semibold mb-1">Image</label>
                             <input type="file" name="grid_images[]" class="w-full border p-2 rounded mb-3">
@@ -250,6 +252,7 @@
                                 <option value="right">Image Right – Text Left</option>
                             </select>
                         </div>
+
 
                     </div>
 

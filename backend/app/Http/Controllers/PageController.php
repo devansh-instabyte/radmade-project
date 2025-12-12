@@ -115,27 +115,30 @@ public function create(Request $request)
         /* -------------------------------
             4. Save Grid Sections
         ------------------------------- */
-        if (!empty($request->grid_titles)) {
 
-            foreach ($request->grid_titles as $i => $title) {
 
-                $imagePath = null;
+      if (!empty($request->grid_titles)) {
+    foreach ($request->grid_titles as $i => $title) {
+        $imagePath = null;
 
                 if ($request->hasFile("grid_images.$i")) {
                     $imagePath = $request->file("grid_images.$i")
                                         ->store("grids", "public");
                 }
 
-                PageGrid::create([
-                    'page_id'     => $page->id,
-                    'image'       => $imagePath,
-                    'title'       => $title ?? "",
-                    'description' => $request->grid_descriptions[$i] ?? "",
-                    'layout'      => $request->grid_layouts[$i] ?? "left",
-                    'sort_order'  => $i + 1,
-                ]);
-            }
-        }
+        PageGrid::create([
+            'page_id'     => $page->id,
+            'section_id'  => $request->grid_section_ids[$i],  // ⭐ FIXED
+            'image'       => $imagePath ?? null,
+            'title'       => $title,
+            'description' => $request->grid_descriptions[$i] ?? null,
+            'layout'      => $request->grid_layouts[$i] ?? "left",
+            'sort_order'  => $i + 1
+        ]);
+    }
+}
+
+
 
 
         /* -------------------------------
@@ -208,18 +211,66 @@ public function create(Request $request)
 // -----------------------------------------------------------------------------------------------------------------------------
 
 
-   public function edit($id)
+public function edit($id)
 {
     $page = Page::findOrFail($id);
 
-    $sliders = PageSlider::where('page_id', $id)->get();
-    $carouselItems = PageCarousel::where('page_id', $id)->get();
-    $gridItems = PageGrid::where('page_id', $id)->get();
-    $bannerItems = PageBanner::where('page_id', $id)->get();
-    $logos = PageLogo::where('page_id', $id)->get();
+    // Fetch all items grouped by ID
+    $sliders       = PageSlider::where('page_id', $id)->get()->keyBy('id');
+    $carouselItems = PageCarousel::where('page_id', $id)->get()->keyBy('id');
+    $gridItems     = PageGrid::where('page_id', $id)->get()->keyBy('id');
+    $bannerItems   = PageBanner::where('page_id', $id)->get()->keyBy('id');
+    $logos         = PageLogo::where('page_id', $id)->get()->keyBy('id');
 
-    return view('pages.edit', compact('page', 'sliders', 'carouselItems', 'gridItems' , 'bannerItems' , 'logos'));
+    $sortedSections = [];
+    $logoSectionAdded = false;   // ⭐ FIX: declare BEFORE loop
+
+    // Build sorted list
+    if ($page->section_order) {
+
+        foreach (json_decode($page->section_order, true) as $row) {
+
+            $id   = $row['id'];
+            $type = $row['type'];
+
+            if ($type === 'slider' && isset($sliders[$id])) {
+                $sortedSections[] = ['type' => 'slider', 'item' => $sliders[$id]];
+            }
+
+            if ($type === 'carousel' && isset($carouselItems[$id])) {
+                $sortedSections[] = ['type' => 'carousel', 'item' => $carouselItems[$id]];
+            }
+
+            if ($type === 'grid' && isset($gridItems[$id])) {
+                $sortedSections[] = ['type' => 'grid', 'item' => $gridItems[$id]];
+            }
+
+            if ($type === 'banner' && isset($bannerItems[$id])) {
+                $sortedSections[] = ['type' => 'banner', 'item' => $bannerItems[$id]];
+            }
+
+            // ⭐ Only ONE logo section allowed
+            if ($type === 'logo' && !$logoSectionAdded) {
+                $sortedSections[] = [
+                    'type' => 'logo',
+                    'item' => $logos   // send full collection
+                ];
+                $logoSectionAdded = true;  // STOP further logo additions
+            }
+        }
+    }
+
+    return view('pages.edit', compact(
+        'page',
+        'sliders',
+        'carouselItems',
+        'gridItems',
+        'bannerItems',
+        'logos',
+        'sortedSections'
+    ));
 }
+
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -239,6 +290,11 @@ public function update(Request $request, $id)
     $page->meta_keywords    = $request->meta_keywords;
     $page->meta_description = $request->meta_description;
     $page->status           = $request->status ?? 1;
+   
+    // ⭐ ONLY update section_order if NOT EMPTY
+if ($request->filled('section_order')) {
+    $page->section_order = $request->section_order;
+}
     $page->save();
 
 
@@ -341,81 +397,47 @@ public function update(Request $request, $id)
     /* ============================================================
         3. GRID — UPDATE OLD + ADD NEW
     ============================================================= */
-    if ($request->layout == "grid") {
+    /* ============================================================
+    3. GRID — UPDATE OLD + ADD NEW (WITH section_id FIX)
+============================================================ */
+if ($request->layout == "grid") {
 
-        $existing = PageGrid::where('page_id', $id)
-                    ->orderBy('sort_order')
-                    ->get()->values();
+    $gridTitles = $request->grid_titles ?? [];
+    $sectionIds = $request->grid_section_ids ?? [];
 
-        if (!empty($request->grid_titles)) {
+    foreach ($gridTitles as $i => $title) {
 
-            foreach ($request->grid_titles as $i => $title) {
+        // Identify existing row ID
+        $gridId = $request->grid_ids[$i] ?? null;
 
-                $grid = $existing[$i] ?? new PageGrid();
-                $grid->page_id = $id;
+        // Find existing row OR create new
+        $grid = PageGrid::find($gridId) ?? new PageGrid();
+        $grid->page_id = $id;
 
-                $grid->title       = $title;
-                $grid->description = $request->grid_descriptions[$i] ?? null;
-                $grid->layout      = $request->grid_layouts[$i] ?? "left";
+        // Always keep original section_id OR assign one
+        $grid->section_id = $sectionIds[$i] ?? "grid_" . ($i + 1);
 
-                if ($request->hasFile("grid_images.$i")) {
-                    $grid->image = $request->file("grid_images.$i")
-                                          ->store("grids", "public");
-                }
+        // Update fields
+        $grid->title       = $title;
+        $grid->description = $request->grid_descriptions[$i] ?? null;
+        $grid->layout      = $request->grid_layouts[$i] ?? "left";
 
-                $grid->sort_order = $i + 1;
-                $grid->save();
-            }
+        // Update Image only if new uploaded
+        if ($request->hasFile("grid_images.$i")) {
+            $grid->image = $request->file("grid_images.$i")->store("grids", "public");
         }
+
+        $grid->sort_order = $i + 1;
+        $grid->save();
     }
+}
+
 
 
 
     /* ============================================================
         4. BANNER — UPDATE OLD + ADD NEW
     ============================================================= */
-//     if ($request->layout == "banner") {
-
-//     $existing = PageBanner::where('page_id', $id)->orderBy('sort_order')->get()->values();
-
-//     $bannerTitles = $request->banner_titles ?? [];
-
-//     foreach ($bannerTitles as $i => $title) {
-
-//         $banner = $existing[$i] ?? new PageBanner();
-//         $banner->page_id = $id;
-
-//         // TEXT FIELDS
-//         $banner->title        = $title;
-//         $banner->subtitle     = $request->banner_subtitles[$i] ?? null;
-//         $banner->button1_text = $request->banner_button1_text[$i] ?? null;
-//         $banner->button1_link = $request->banner_button1_link[$i] ?? null;
-//         $banner->button2_text = $request->banner_button2_text[$i] ?? null;
-//         $banner->button2_link = $request->banner_button2_link[$i] ?? null;
-
-//         // BACKGROUND IMAGE
-//         if ($request->hasFile("banner_bg_image.$i")) {
-//             $banner->bg_image = $request->file("banner_bg_image.$i")
-//                                        ->store("banners/bg", "public");
-//         }
-
-//         // MAIN IMAGE
-//         if ($request->hasFile("banner_image.$i")) {
-//             $banner->image = $request->file("banner_image.$i")
-//                                     ->store("banners/main", "public");
-//         }
-
-//         // TEXT IMAGE
-//         if ($request->hasFile("banner_text_img.$i")) {
-//             $banner->text_img = $request->file("banner_text_img.$i")
-//                                        ->store("banners/text", "public");
-//         }
-
-//         $banner->sort_order = $i + 1;
-//         $banner->save();
-//     }
-// }
-
 
 
 if ($request->layout == "banner") {
@@ -463,16 +485,36 @@ if ($request->layout == "banner") {
 // Logos 
 if ($request->layout == "logos") {
 
-    if ($request->hasFile("logo_images")) {
+    $existingIds = $request->logo_ids ?? []; // IDs of logos still in form
 
-        foreach ($request->file("logo_images") as $i => $image) {
+    /* ---------------------------------------
+       1. Delete removed logos
+    --------------------------------------- */
+    PageLogo::where('page_id', $id)
+            ->whereNotIn('id', $existingIds)
+            ->delete();
 
-            $logo = new PageLogo();
-            $logo->page_id = $page->id;
-            $logo->sort_order = $i + 1;
-            $logo->image = $image->store("logos", "public");
-            $logo->save();
+    /* ---------------------------------------
+       2. Update + Add Logos
+    --------------------------------------- */
+
+    $uploadedImages = $request->logo_images ?? []; // array of uploaded files
+
+    foreach ($uploadedImages as $i => $imageFile) {
+
+        $logoId = $existingIds[$i] ?? null; // match index with form
+
+        // Update existing OR create new
+        $logo = PageLogo::find($logoId) ?? new PageLogo();
+        $logo->page_id = $id;
+        $logo->sort_order = $i + 1;
+
+        // If a new file is uploaded, update image
+        if ($imageFile) {
+            $logo->image = $imageFile->store("logos", "public");
         }
+
+        $logo->save();
     }
 }
 

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('page_grids', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('page_id');
+             $table->unsignedBigInteger('section_id');
             $table->string('image')->nullable();
             $table->string('title')->nullable();
             $table->text('description')->nullable();

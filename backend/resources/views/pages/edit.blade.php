@@ -286,51 +286,56 @@
 
                     <!-- GRID FORM -->
                     <div id="gridForm"
-                         class="{{ $page->layout == 'grid' ? '' : 'hidden' }} p-4 border rounded-lg bg-gray-50">
+     class="{{ $page->layout == 'grid' ? '' : 'hidden' }} p-4 border rounded-lg bg-gray-50">
 
-                        <h3 class="font-bold mb-4">Grid Sections</h3>
+    <h3 class="font-bold mb-4">Grid Sections</h3>
 
-                        <div id="gridContainer" class="space-y-4">
+    <div id="gridContainer" class="space-y-4">
 
-                            @foreach ($gridItems as $i => $g)
-                            <div class="grid-block p-4 border rounded bg-white relative">
-                                <!-- Delete button -->
-                                <button type="button"
-                                    class="delete-grid absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                                    Delete
-                                </button>
+        @foreach ($gridItems as $i => $g)
+        <div class="grid-block p-4 border rounded bg-white relative">
 
-                                <h4 class="font-semibold mb-2">Section {{ $i+1 }}</h4>
+            <!-- Delete button -->
+            <button type="button"
+                class="delete-grid absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                Delete
+            </button>
 
-                                <!-- Existing ID -->
-                                <input type="hidden" name="grid_ids[]" value="{{ $g->id }}">
+            <h4 class="font-semibold mb-2">Section {{ $i+1 }}</h4>
 
-                                <img src="{{ asset('storage/'.$g->image) }}" class="w-32 mb-2 rounded">
+            <!-- EXISTING GRID ROW ID -->
+            <input type="hidden" name="grid_ids[]" value="{{ $g->id }}">
 
-                                <input type="file" name="grid_images[]" class="w-full border p-2 rounded mb-2">
+            <!-- ⭐ IMPORTANT: Section ID (so edit preserves grouping) -->
+            <input type="hidden" name="grid_section_ids[]" value="{{ $g->section_id }}">
 
-                                <input type="text" name="grid_titles[]" value="{{ $g->title }}"
-                                       class="w-full border p-2 rounded mb-2">
+            <img src="{{ asset('storage/'.$g->image) }}" class="w-32 mb-2 rounded">
 
-                                <textarea name="grid_descriptions[]" 
-                                          class="w-full border p-2 rounded mb-2">{{ $g->description }}</textarea>
+            <input type="file" name="grid_images[]" class="w-full border p-2 rounded mb-2">
 
-                                <select name="grid_layouts[]" class="w-full border p-2 rounded">
-                                    <option value="left" {{ $g->layout == 'left' ? 'selected' : '' }}>Image Left Text Right</option>
-                                    <option value="right" {{ $g->layout == 'right' ? 'selected' : '' }}>Image Right Text Left</option>
-                                </select>
-                            </div>
-                            @endforeach
+            <input type="text" name="grid_titles[]" value="{{ $g->title }}"
+                   class="w-full border p-2 rounded mb-2">
 
-                        </div>
+            <textarea name="grid_descriptions[]"
+                      class="w-full border p-2 rounded mb-2">{{ $g->description }}</textarea>
 
-                        <!-- Add Grid Section Button -->
-                        <button type="button" id="addGridBtn"
-                                class="mt-4 bg-purple-600 text-white px-4 py-2 rounded">
-                            + Add Section
-                        </button>
+            <select name="grid_layouts[]" class="w-full border p-2 rounded">
+                <option value="left"  {{ $g->layout == 'left' ? 'selected' : '' }}>Image Left – Text Right</option>
+                <option value="right" {{ $g->layout == 'right' ? 'selected' : '' }}>Image Right – Text Left</option>
+            </select>
 
-                    </div>
+        </div>
+        @endforeach
+
+    </div>
+
+    <!-- Add Grid Section Button -->
+    <button type="button" id="addGridBtn"
+            class="mt-4 bg-purple-600 text-white px-4 py-2 rounded">
+        + Add Section
+    </button>
+
+</div>
 
 
                     <!-- Banner Form -->
@@ -454,6 +459,141 @@
 
                     <!-- End -->
 
+                    <!-- Drag and drop to reorder sections. -->
+                     <!-- SORT ORDER SECTION -->
+<div class="bg-white p-6 mt-8 rounded-lg shadow-md">
+    <h3 class="text-xl font-bold mb-4">Page Section Order</h3>
+
+    <ul id="sortableSections" class="space-y-2">
+
+        @php
+            $alreadyShown = [];
+        @endphp
+
+        {{-- ===============================
+            STEP 1: SHOW SORTED SECTIONS
+        =============================== --}}
+        @if (!empty($sortedSections))
+            @foreach ($sortedSections as $row)
+                @php
+                    $type = $row['type'];
+                    $item = $row['item'];  // model OR collection
+                @endphp
+
+                {{-- LOGO SECTION --}}
+                @if ($type === 'logo')
+                    <li class="p-3 border rounded bg-gray-100 cursor-move"
+                        data-type="logo"
+                        data-id="logos">
+
+                        🟡 Logos Section ({{ $logos->count() }} logos)
+                    </li>
+
+                    @php $alreadyShown[] = 'logos'; @endphp
+                @else
+                    {{-- NORMAL SECTIONS --}}
+                    <li class="p-3 border rounded bg-gray-100 cursor-move"
+                        data-type="{{ $type }}"
+                        data-id="{{ $item->id }}">
+                        
+                        @switch($type)
+                            @case('slider')
+                                🔵 Slider – {{ $item->title }}
+                                @break
+
+                            @case('carousel')
+                                🟣 Carousel – {{ $item->title }}
+                                @break
+
+                            @case('grid')
+                                🟩 Grid Section – {{ $item->title }}
+                                @break
+
+                            @case('banner')
+                                🟠 Banner – {{ $item->title }}
+                                @break
+                        @endswitch
+                    </li>
+
+                    @php $alreadyShown[] = $item->id; @endphp
+                @endif
+
+            @endforeach
+        @endif
+
+
+
+        {{-- ===================================
+            STEP 2: ADD NEWLY CREATED SECTIONS
+        =================================== --}}
+
+        {{-- Sliders --}}
+        @foreach ($sliders as $s)
+            @if (!in_array($s->id, $alreadyShown))
+                <li class="p-3 border rounded bg-gray-100 cursor-move"
+                    data-type="slider"
+                    data-id="{{ $s->id }}">
+                    🔵 Slider – {{ $s->title }}
+                </li>
+            @endif
+        @endforeach
+
+
+        {{-- Carousel --}}
+        @foreach ($carouselItems as $c)
+            @if (!in_array($c->id, $alreadyShown))
+                <li class="p-3 border rounded bg-gray-100 cursor-move"
+                    data-type="carousel"
+                    data-id="{{ $c->id }}">
+                    🟣 Carousel – {{ $c->title }}
+                </li>
+            @endif
+        @endforeach
+
+
+        {{-- Grid --}}
+        @foreach ($gridItems as $g)
+            @if (!in_array($g->id, $alreadyShown))
+                <li class="p-3 border rounded bg-gray-100 cursor-move"
+                    data-type="grid"
+                    data-id="{{ $g->id }}">
+                    🟩 Grid Section – {{ $g->title }}
+                </li>
+            @endif
+        @endforeach
+
+
+        {{-- Banner --}}
+        @foreach ($bannerItems as $b)
+            @if (!in_array($b->id, $alreadyShown))
+                <li class="p-3 border rounded bg-gray-100 cursor-move"
+                    data-type="banner"
+                    data-id="{{ $b->id }}">
+                    🟠 Banner – {{ $b->title }}
+                </li>
+            @endif
+        @endforeach
+
+
+        {{-- LOGOS – ALWAYS ONE BLOCK --}}
+        @if (!in_array('logos', $alreadyShown))
+            <li class="p-3 border rounded bg-gray-100 cursor-move"
+                data-type="logo"
+                data-id="logos">
+                🟡 Logos Section ({{ $logos->count() }} logos)
+            </li>
+        @endif
+
+
+    </ul>
+
+    <input type="hidden" name="section_order" id="sectionOrderInput">
+</div>
+
+
+
+                    <!-- end -->
+
                 </div>
             </div>
 
@@ -465,6 +605,8 @@
 
 <!-- CKEditor -->
 <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
 
 <script>
 ClassicEditor.create(document.querySelector('#content'));
