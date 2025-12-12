@@ -111,6 +111,12 @@
                         Banner Sections
                     </button>   
 
+                  <button type="button"
+                        class="layout-btn w-full p-3 rounded-lg text-left font-semibold
+                            {{ $page->layout == 'logos' ? 'bg-blue-200' : 'bg-gray-100' }}"
+                        data-target="logosForm">
+                        Division Logos
+                    </button>   
 
                 </div>
 
@@ -411,6 +417,42 @@
 
 
                     <!-- end -->
+
+
+                    <!-- Logos Form -->
+                     <div id="logosForm" class="{{ $page->layout == 'logos' ? '' : 'hidden' }} p-4 border rounded-lg bg-gray-50">
+
+                        <h3 class="font-bold mb-4">Division Logos</h3>
+
+                        <div id="logoContainer" class="space-y-4">
+
+                            @foreach ($logos as $i => $logo)
+                            <div class="logo-block p-4 border rounded bg-white relative">
+
+                                 <!-- Delete Button -->
+                                <button type="button"
+                                    class="delete-logo absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                    Delete
+                                </button>
+                                <input type="hidden" name="logo_ids[]" value="{{ $logo->id }}">
+
+                                <img src="{{ asset('storage/'.$logo->image) }}" class="w-32 rounded mb-2">
+
+                                <input type="file" name="logo_images[]" class="w-full border p-2 rounded">
+
+                            </div>
+                            @endforeach
+
+                        </div>
+
+                        <button type="button" id="addLogoBtn"
+                                class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">
+                            + Add Logo
+                        </button>
+
+                    </div>
+
+                    <!-- End -->
 
                 </div>
             </div>

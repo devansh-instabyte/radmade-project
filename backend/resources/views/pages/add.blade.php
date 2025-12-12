@@ -92,6 +92,10 @@
                             
                     <button type="button" class="layout-btn w-full bg-gray-100 p-3 rounded-lg text-left font-semibold"
                             data-target="bannerForm">Banner Sections</button>
+                    
+                    <button type="button" class="layout-btn w-full bg-gray-100 p-3 rounded-lg text-left font-semibold"
+                            data-target="logosForm">Division Logos</button>
+
                 </div>
 
                 <!-- Forms -->
@@ -305,6 +309,31 @@
                             </button>
 
                         </div>
+
+
+                        <!-- ---------------------------------------------Division Logos------------------------------- -->
+                         <div id="logosForm" class="hidden p-4 border rounded-lg bg-gray-50">
+
+                                <h3 class="font-bold mb-4">Division Logos</h3>
+
+                                <div id="logoContainer" class="space-y-4">
+
+                                    <div class="logo-block p-4 border rounded bg-white">
+                                        <h4 class="font-semibold mb-2">Logo 1</h4>
+
+                                        <label class="block font-semibold mb-1">Logo Image</label>
+                                        <input type="file" name="logo_images[]" class="w-full border p-2 rounded mb-2">
+                                    </div>
+
+                                </div>
+
+                                <button type="button" id="addLogoBtn"
+                                        class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">
+                                    + Add Logo
+                                </button>
+
+                            </div>
+
 
 
 

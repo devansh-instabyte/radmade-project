@@ -7,6 +7,7 @@ use App\Models\PageSlider;
 use App\Models\PageCarousel;
 use App\Models\PageBanner;
 use App\Models\PageGrid;
+use App\Models\PageLogo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str; 
 
@@ -181,6 +182,20 @@ public function create(Request $request)
             }
         }
 
+        if ($request->hasFile('logo_images')) {
+
+            foreach ($request->file('logo_images') as $i => $logoFile) {
+
+                $path = $logoFile->store("logos", "public");
+
+                PageLogo::create([
+                    'page_id'    => $page->id,
+                    'image'      => $path,
+                    'sort_order' => $i + 1,
+                ]);
+            }
+        }
+
 
         return redirect()->back()->with("success", "Page Created Successfully");
     }
@@ -200,9 +215,10 @@ public function create(Request $request)
     $sliders = PageSlider::where('page_id', $id)->get();
     $carouselItems = PageCarousel::where('page_id', $id)->get();
     $gridItems = PageGrid::where('page_id', $id)->get();
-      $bannerItems = PageBanner::where('page_id', $id)->get();
+    $bannerItems = PageBanner::where('page_id', $id)->get();
+    $logos = PageLogo::where('page_id', $id)->get();
 
-    return view('pages.edit', compact('page', 'sliders', 'carouselItems', 'gridItems' , 'bannerItems'));
+    return view('pages.edit', compact('page', 'sliders', 'carouselItems', 'gridItems' , 'bannerItems' , 'logos'));
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -244,6 +260,9 @@ public function update(Request $request, $id)
 
     if ($request->delete_banner_ids) {
         PageBanner::whereIn('id', $request->delete_banner_ids)->delete();
+    }
+     if ($request->delete_logo_ids) {
+        PageLogo::whereIn('id', $request->delete_logo_ids)->delete();
     }
 
 
@@ -440,6 +459,24 @@ if ($request->layout == "banner") {
     }
 }
 
+
+// Logos 
+if ($request->layout == "logos") {
+
+    if ($request->hasFile("logo_images")) {
+
+        foreach ($request->file("logo_images") as $i => $image) {
+
+            $logo = new PageLogo();
+            $logo->page_id = $page->id;
+            $logo->sort_order = $i + 1;
+            $logo->image = $image->store("logos", "public");
+            $logo->save();
+        }
+    }
+}
+
+// end
 
      
     /* -------------------------------------------------------

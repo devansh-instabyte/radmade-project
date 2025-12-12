@@ -225,6 +225,14 @@ document.addEventListener("click", function (e) {
         addDeleteInput("delete_grid_ids[]", idInput ? idInput.value : null);
         block.remove();
     }
+
+     // LOGO DELETE
+    if (e.target.classList.contains("delete-logo")) {
+        const block = e.target.closest(".logo-block");
+        const idInput = block.querySelector("input[name='logo_ids[]']");
+        addDeleteInput("delete_logo_ids[]", idInput ? idInput.value : null);
+        block.remove();
+    }
 });
 
 
@@ -307,6 +315,31 @@ document.addEventListener("click", function (e) {
 
 
 // <!-- end -->
+
+// Division Logos Layout Selection
+document.addEventListener("DOMContentLoaded", () => {
+
+    let logoIndex = 1;
+    const logoContainer = document.getElementById("logoContainer");
+    const addLogoBtn = document.getElementById("addLogoBtn");
+
+    if (addLogoBtn) {
+        addLogoBtn.addEventListener("click", () => {
+            logoIndex++;
+            logoContainer.insertAdjacentHTML("beforeend", `
+                <div class="logo-block p-4 border rounded bg-white mt-4">
+                    <h4 class="font-semibold mb-2">Logo ${logoIndex}</h4>
+
+                    <label class="block font-semibold mb-1">Logo Image</label>
+                    <input type="file" name="logo_images[]" class="w-full border p-2 rounded mb-2">
+                </div>
+            `);
+        });
+    }
+
+});
+
+// end
 
 // <!-- Layout Selection Script -->
 
