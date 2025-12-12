@@ -154,12 +154,12 @@
                         </div>
 
                         <!-- Optional: Add new slider button -->
-                        {{-- 
+                        
                         <button type="button" id="addSliderBtn"
                                 class="mt-4 bg-green-500 text-white px-4 py-2 rounded">
                             + Add Slider
                         </button>
-                        --}}
+                    
                     </div>
 
                     <!-- CAROUSEL FORM -->
@@ -310,8 +310,8 @@
                                           class="w-full border p-2 rounded mb-2">{{ $g->description }}</textarea>
 
                                 <select name="grid_layouts[]" class="w-full border p-2 rounded">
-                                    <option value="left" {{ $g->layout == 'left' ? 'selected' : '' }}>Image Left</option>
-                                    <option value="right" {{ $g->layout == 'right' ? 'selected' : '' }}>Image Right</option>
+                                    <option value="left" {{ $g->layout == 'left' ? 'selected' : '' }}>Image Left Text Right</option>
+                                    <option value="right" {{ $g->layout == 'right' ? 'selected' : '' }}>Image Right Text Left</option>
                                 </select>
                             </div>
                             @endforeach
@@ -402,10 +402,10 @@
         @endforeach
     </div>
 
-    <!-- <button type="button" id="addBannerBtn"
+    <button type="button" id="addBannerBtn"
             class="mt-4 bg-orange-500 text-white px-4 py-2 rounded">
         + Add Banner Section
-    </button> -->
+    </button>
 </div>
 
 

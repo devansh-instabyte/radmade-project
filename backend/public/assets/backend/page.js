@@ -43,10 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <input type="file" name="banner_text_img[]" class="w-full border p-2 rounded mb-3">
 
             <label class="block font-semibold mb-1">Title</label>
-            <input type="text" name="banner_title[]" class="w-full border p-2 rounded mb-3">
+            <input type="text" name="banner_titles[]" class="w-full border p-2 rounded mb-3">
 
             <label class="block font-semibold mb-1">Subtitle</label>
-            <input type="text" name="banner_subtitle[]" class="w-full border p-2 rounded mb-3">
+            <input type="text" name="banner_subtitles[]" class="w-full border p-2 rounded mb-3">
 
             <!-- Button 1 -->
             <label class="block font-semibold mb-1">Button 1 Text</label>

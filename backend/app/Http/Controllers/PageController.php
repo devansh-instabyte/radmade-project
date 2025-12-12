@@ -355,41 +355,84 @@ public function update(Request $request, $id)
     /* ============================================================
         4. BANNER — UPDATE OLD + ADD NEW
     ============================================================= */
-    if ($request->layout == "banner") {
+//     if ($request->layout == "banner") {
 
-    $existing = PageBanner::where('page_id', $id)->orderBy('sort_order')->get()->values();
+//     $existing = PageBanner::where('page_id', $id)->orderBy('sort_order')->get()->values();
+
+//     $bannerTitles = $request->banner_titles ?? [];
+
+//     foreach ($bannerTitles as $i => $title) {
+
+//         $banner = $existing[$i] ?? new PageBanner();
+//         $banner->page_id = $id;
+
+//         // TEXT FIELDS
+//         $banner->title        = $title;
+//         $banner->subtitle     = $request->banner_subtitles[$i] ?? null;
+//         $banner->button1_text = $request->banner_button1_text[$i] ?? null;
+//         $banner->button1_link = $request->banner_button1_link[$i] ?? null;
+//         $banner->button2_text = $request->banner_button2_text[$i] ?? null;
+//         $banner->button2_link = $request->banner_button2_link[$i] ?? null;
+
+//         // BACKGROUND IMAGE
+//         if ($request->hasFile("banner_bg_image.$i")) {
+//             $banner->bg_image = $request->file("banner_bg_image.$i")
+//                                        ->store("banners/bg", "public");
+//         }
+
+//         // MAIN IMAGE
+//         if ($request->hasFile("banner_image.$i")) {
+//             $banner->image = $request->file("banner_image.$i")
+//                                     ->store("banners/main", "public");
+//         }
+
+//         // TEXT IMAGE
+//         if ($request->hasFile("banner_text_img.$i")) {
+//             $banner->text_img = $request->file("banner_text_img.$i")
+//                                        ->store("banners/text", "public");
+//         }
+
+//         $banner->sort_order = $i + 1;
+//         $banner->save();
+//     }
+// }
+
+
+
+if ($request->layout == "banner") {
 
     $bannerTitles = $request->banner_titles ?? [];
 
     foreach ($bannerTitles as $i => $title) {
 
-        $banner = $existing[$i] ?? new PageBanner();
+        // Get ID from request (hidden input)
+        $bannerId = $request->banner_ids[$i] ?? null;
+
+        // Update existing OR create new
+        $banner = PageBanner::find($bannerId) ?? new PageBanner();
         $banner->page_id = $id;
 
-        // TEXT FIELDS
+        // Text fields
         $banner->title        = $title;
-        $banner->subtitle     = $request->banner_subtitles[$i] ?? null;
-        $banner->button1_text = $request->banner_button1_text[$i] ?? null;
-        $banner->button1_link = $request->banner_button1_link[$i] ?? null;
-        $banner->button2_text = $request->banner_button2_text[$i] ?? null;
-        $banner->button2_link = $request->banner_button2_link[$i] ?? null;
+        $banner->subtitle     = $request->banner_subtitles[$i] ?? $banner->subtitle;
+        $banner->button1_text = $request->banner_button1_text[$i] ?? $banner->button1_text;
+        $banner->button1_link = $request->banner_button1_link[$i] ?? $banner->button1_link;
+        $banner->button2_text = $request->banner_button2_text[$i] ?? $banner->button2_text;
+        $banner->button2_link = $request->banner_button2_link[$i] ?? $banner->button2_link;
 
-        // BACKGROUND IMAGE
+        // Background Image
         if ($request->hasFile("banner_bg_image.$i")) {
-            $banner->bg_image = $request->file("banner_bg_image.$i")
-                                       ->store("banners/bg", "public");
+            $banner->bg_image = $request->file("banner_bg_image.$i")->store("banners/bg", "public");
         }
 
-        // MAIN IMAGE
+        // Main Image
         if ($request->hasFile("banner_image.$i")) {
-            $banner->image = $request->file("banner_image.$i")
-                                    ->store("banners/main", "public");
+            $banner->image = $request->file("banner_image.$i")->store("banners/main", "public");
         }
 
-        // TEXT IMAGE
+        // Text Image
         if ($request->hasFile("banner_text_img.$i")) {
-            $banner->text_img = $request->file("banner_text_img.$i")
-                                       ->store("banners/text", "public");
+            $banner->text_img = $request->file("banner_text_img.$i")->store("banners/text", "public");
         }
 
         $banner->sort_order = $i + 1;
@@ -398,6 +441,7 @@ public function update(Request $request, $id)
 }
 
 
+     
     /* -------------------------------------------------------
         FINISH
     ------------------------------------------------------- */
