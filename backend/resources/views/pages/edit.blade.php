@@ -402,10 +402,10 @@
         @endforeach
     </div>
 
-    <button type="button" id="addBannerBtn"
+    <!-- <button type="button" id="addBannerBtn"
             class="mt-4 bg-orange-500 text-white px-4 py-2 rounded">
         + Add Banner Section
-    </button>
+    </button> -->
 </div>
 
 
